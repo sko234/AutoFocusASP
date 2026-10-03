@@ -372,6 +372,15 @@
 
     document.querySelectorAll('[data-car-slider]').forEach(initCarSlider);
 
+    /* ---- Comment replies ----------------------------------------------- */
+
+    document.querySelectorAll('[data-reply-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var form = document.querySelector('[data-reply-form="' + button.dataset.replyToggle + '"]');
+            if (form) { form.classList.toggle('is-open'); }
+        });
+    });
+
     /* ---- Data-href links -----------------------------------------------
        The hero tiles and the Fleet brand rectangles are the direct children of
        a grid, and the stylesheet addresses them with :nth-child. Wrapping them

@@ -1,0 +1,31 @@
+﻿@model HomeViewModel
+
+<section class="hero">
+    <div class="hero-bg parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1503376713919-8669438992e1?auto=format&fit=crop&q=80&w=2000');"></div>
+    <div class="hero-image-grid" id="heroImageGrid">
+        @for (var i = 0; i < Model.Cars.Count; i++)
+        {
+            var car = Model.Cars[i];
+            var gridRow = i < 9 ? i / 3 + 1 : i < 12 ? i - 8 : i - 11;
+            var gridColumn = i < 9 ? i % 3 + 2 : i < 12 ? 1 : 5;
+            <img src="~/images/@car.HeroImage" alt="@car.Name" data-href="/car/@car.Slug" style="grid-row: @gridRow; grid-column: @gridColumn;" />
+        }
+    </div>
+    <div class="hero-content">
+        <h1 class="hero-title reveal-text" data-en="CHASE THE HORIZON" data-bg="ГОНИ ХОРИЗОНТА">CHASE THE HORIZON</h1>
+    </div>
+    <div class="scroll-indicator" data-en="Scroll to discover" data-bg="Превърти, за да откриеш">Scroll to discover</div>
+</section>
+
+<section id="models" class="fleet">
+    <h2 class="section-title fade-up" data-en="The Fleet" data-bg="Автопаркът">The Fleet</h2>
+    <div class="fleet-container fleet-row">
+        @foreach (var brand in CarData.Brands)
+        {
+            <div class="fleet-rect" data-href="/@brand.ToLowerInvariant()" style="cursor: pointer;">
+                <div class="fleet-rect-media"><img class="fleet-rect-logo" src="~/images/@CarData.BrandLogos[brand]" alt="@brand" /></div>
+                <div class="fleet-rect-space"></div>
+            </div>
+        }
+    </div>
+</section>

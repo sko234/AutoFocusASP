@@ -1,0 +1,36 @@
+@model LoginViewModel
+
+<section style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 6rem 2rem 2rem;">
+    <div style="width: 100%; max-width: 420px;">
+        <h1 style="font-family: var(--font-heading); font-size: 2.5rem; text-transform: uppercase; letter-spacing: 5px; text-align: center; margin-bottom: 0.5rem;" data-en="Login" data-bg="Вход">Login</h1>
+        <p style="text-align: center; color: var(--color-silver); font-size: 0.9rem; margin-bottom: 2rem;" data-en="Access your Porsche account" data-bg="Влезте във вашия Porsche профил">Access your Porsche account</p>
+
+        <form asp-controller="Account" asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" style="background: rgba(255, 255, 255, 0.1); border: 1px solid #ffffff; padding: 0.8rem; margin-bottom: 1.5rem; border-radius: 2px;">
+                <p style="color: #ffffff; font-size: 0.85rem; margin: 0.2rem 0;">@Html.ValidationSummary(false)</p>
+            </div>
+
+            <div style="margin-bottom: 1.2rem;">
+                <label asp-for="Email" style="display: block; font-family: var(--font-heading); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--color-silver);" data-en="EMAIL" data-bg="ИМЕЙЛ">EMAIL</label>
+                <input asp-for="Email" type="email" required style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: var(--color-text); padding: 0.8rem; font-family: var(--font-main); font-size: 1rem;" />
+            </div>
+            <div style="margin-bottom: 1.2rem;">
+                <label asp-for="Password" style="display: block; font-family: var(--font-heading); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--color-silver);" data-en="PASSWORD" data-bg="ПАРОЛА">PASSWORD</label>
+                <input asp-for="Password" type="password" required style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: var(--color-text); padding: 0.8rem; font-family: var(--font-main); font-size: 1rem;" />
+            </div>
+            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <input asp-for="RememberMe" type="checkbox" id="rememberMe" style="accent-color: #ffffff;" />
+                <label for="rememberMe" style="color: var(--color-silver); font-size: 0.85rem;" data-en="Remember me" data-bg="Запомни ме">Remember me</label>
+            </div>
+            <button type="submit" style="width: 100%; background: #ffffff; color: #050505; border: none; padding: 1rem; font-family: var(--font-heading); font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; cursor: pointer;" data-en="LOGIN" data-bg="ВХОД">LOGIN</button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; color: var(--color-silver); font-size: 0.9rem;">
+            <span data-en="Don't have an account?" data-bg="Нямате профил?">Don't have an account?</span>
+            <a asp-controller="Account" asp-action="Register" style="color: var(--color-text); text-decoration: none; font-weight: 600;" data-en="Sign Up" data-bg="Регистрирайте се">Sign Up</a>
+        </p>
+        <p style="text-align: center; margin-top: 0.8rem;">
+            <a href="/" style="color: var(--color-silver); text-decoration: none; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;" data-en="&larr; Back to site" data-bg="&larr; Обратно към сайта">&larr; Back to site</a>
+        </p>
+    </div>
+</section>

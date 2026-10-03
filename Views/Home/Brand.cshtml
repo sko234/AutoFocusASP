@@ -1,0 +1,19 @@
+@model BrandViewModel
+
+<section style="padding: 12rem 5% 6rem; text-align: center;">
+    <h1 style="font-family: var(--font-heading); text-transform: uppercase; letter-spacing: 5px;">@Model.Brand.ToUpperInvariant()</h1>
+    <div class="brand-cards-row">
+        @foreach (var car in Model.Cars)
+        {
+            <div class="brand-card" data-href="/car/@car.Slug">
+                <div style="flex: 0 0 55%; overflow: hidden;">
+                    <img src="~/images/@car.HeroImage" alt="@car.Name" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                </div>
+                <div style="flex: 1 1 auto; padding: 0.9rem 1.2rem 1.2rem; text-align: left;">
+                    <p style="margin: 0; color: #ffffff; font-family: var(--font-heading); font-size: 1.05rem; letter-spacing: 1px; text-transform: uppercase;">@car.Name</p>
+                    <p style="margin: 0.3rem 0 0; color: rgba(255,255,255,0.7); font-weight: 300; font-size: 0.8rem; letter-spacing: 1px;" data-en="See the car" data-bg="Вижте автомобила">See the car</p>
+                </div>
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,15 @@
+## Build output
+bin/
+obj/
+
+## SQLite database (recreated automatically on first run)
+app.db
+app.db-shm
+app.db-wal
+
+## User-specific and IDE files
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/

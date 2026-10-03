@@ -1,0 +1,228 @@
+@model CarDetailsViewModel
+@{
+    var car = Model.Car;
+    var sliderImages = System.Text.Json.JsonSerializer.Serialize(
+        car.Images.Select(i => "/images/" + i).ToArray());
+
+    // Dates are stored in UTC; the original showed them in the reader's own
+    // timezone, so convert before formatting.
+    string FormatDate(DateTime utc)
+    {
+        var local = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), TimeZoneInfo.Local);
+        string[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        return $"{months[local.Month - 1]} {local.Day:00}, {local.Year} {local.Hour:00}:{local.Minute:00}";
+    }
+
+    var isCarouselLiked = ViewBag.IsCarouselLiked is bool liked && liked;
+}
+
+<div data-car-slider data-carousel-liked="@(isCarouselLiked ? "true" : "false")">
+    <script type="application/json">@Html.Raw(sliderImages)</script>
+
+    <section style="min-height: 100vh; padding: 8rem 5% 4rem; max-width: 1400px; margin: 0 auto;">
+        <div style="display: flex; gap: 3rem; align-items: center; flex-wrap: wrap;">
+            <div class="car-detail-image-col" style="flex: 1 1 55%; min-width: 320px;">
+                <p style="text-align: center; margin: 0 0 1.2rem; font-family: var(--font-heading); font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 400; color: var(--color-text);">@car.Name</p>
+                <div class="car-image-frame" style="position: relative; margin: 0 2rem;" data-like-enabled="@(User.Identity?.IsAuthenticated == true ? "true" : "false")" data-car-slug="@car.Slug">
+                    <img data-car-slider-image src="~/images/@car.Images[0]" alt="@car.Name" style="width: 100%; display: block; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));" />
+                    <button data-car-slider-prev aria-label="Previous image" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: var(--color-text); border: 1px solid rgba(255,255,255,0.3); width: 42px; height: 42px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">&#8249;</button>
+                    <button data-car-slider-next aria-label="Next image" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: var(--color-text); border: 1px solid rgba(255,255,255,0.3); width: 42px; height: 42px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">&#8250;</button>
+                </div>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="car-listings-card">
+                        <div style="padding: 0.85rem 1rem; font-family: var(--font-heading); font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 400; text-align: center;" data-en="See Car Listings" data-bg="Вижте обяви на колата">See Car Listings</div>
+                        <div class="car-listings-body">
+                            @foreach (var listing in car.Listings)
+                            {
+                                <a href="@listing.Url" target="_blank" rel="noopener noreferrer" style="color: #ffffff; font-size: 0.95rem; line-height: 1.3; word-break: break-all; text-decoration: underline;">@listing.Url</a>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="car-listings-card car-listings-locked">
+                        <div style="padding: 0.85rem 1rem; font-family: var(--font-heading); font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 400; display: flex; align-items: center; justify-content: center; min-height: 3.4rem; text-align: center;">
+                            <span class="listings-label" data-en="See Car Listings" data-bg="Вижте обяви на колата">See Car Listings</span>
+                            <span class="listings-login-msg" data-en="Log in/Sign up to see listings" data-bg="Влез/Регистрирай се, за да видиш обявите">Log in/Sign up to see listings</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="car-detail-info-col" style="flex: 1 1 35%; min-width: 280px; display: flex; flex-direction: column; gap: 1.95rem;">
+                <div class="car-glow-card" style="background: rgba(60,60,60,0.9); border-radius: 4px; padding: 1.5rem 1.8rem; min-height: @CarData.DescriptionMinHeight; box-sizing: border-box;">
+                    <p style="color: #ffffff; font-size: 1.21rem; line-height: 1.6; margin: 0;" data-en="@car.DescriptionEn" data-bg="@car.DescriptionBg">@car.DescriptionEn</p>
+                </div>
+                <div class="car-glow-card" style="background: rgba(60,60,60,0.9); border-radius: 4px; padding: 1.5rem 1.8rem; min-height: @(car.SpecsMinHeight)px; box-sizing: border-box;">
+                    <p style="color: #ffffff; font-size: 1.31rem; line-height: 1.6; margin: 0; white-space: pre-line;" data-en="@car.SpecsEn" data-bg="@car.SpecsBg">@car.SpecsEn</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="scroll-indicator car-comments-indicator" data-en="Scroll to see comments" data-bg="Превърти, за да видиш коментарите">Scroll to see comments</div>
+
+    <style>
+        .car-comments-indicator {
+            position: relative;
+            top: -100px;
+            bottom: auto;
+            left: auto;
+            transform: none;
+            width: fit-content;
+            margin: 0 auto 3rem;
+            animation: comments-bounce 2s infinite;
+        }
+        @@keyframes comments-bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .car-image-frame { overflow: visible; }
+        .car-listings-locked .listings-login-msg { display: none; }
+        .car-listings-locked:hover .listings-label { display: none; }
+        .car-listings-locked:hover .listings-login-msg { display: inline; font-size: 0.95rem; letter-spacing: 1px; }
+        .car-comment-author-admin { color: #d4af37; font-weight: 700; letter-spacing: 2px; }
+        .like-heart {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 3;
+            pointer-events: none;
+            font-size: 3rem;
+            line-height: 1;
+            transform: translate(-50%, -50%) scale(1.25);
+            animation: like-heart-flight 1.1s ease-out forwards;
+        }
+        .like-heart.is-liked {
+            left: 1rem;
+            top: 1rem;
+            transform: translate(0, 0) scale(0.65);
+            opacity: 0.95;
+            animation: none;
+        }
+        @@keyframes like-heart-flight {
+            0%, 27% { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
+            100% { left: 1rem; top: 1rem; transform: translate(0, 0) scale(0.65); opacity: 0.95; }
+        }
+        .car-comment { scroll-margin-top: 8rem; }
+        .car-comment:target { outline: 1px solid #ffffff; outline-offset: 4px; }
+        .car-comment-reply { margin-left: 2rem; padding-left: 1rem; border-left: 1px solid rgba(255, 255, 255, 0.15); }
+        .comment-actions { margin-top: 0.45rem; }
+        .comment-reply-toggle {
+            background: transparent; color: var(--color-text); border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 0.3rem 0.6rem; font-family: var(--font-heading); font-size: 0.7rem;
+            letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+        }
+        .comment-reply-form { display: none; margin: 0.75rem 0 0.25rem; }
+        .comment-reply-form.is-open { display: flex; }
+        @@media (max-width: 700px) {
+            .car-comment-reply { margin-left: 1rem; padding-left: 0.75rem; }
+        }
+    </style>
+
+    <section class="car-comments">
+        <h2 class="car-comments-title" data-en="Comments" data-bg="Коментари">Comments</h2>
+
+        @if (Model.Comments.Count == 0)
+        {
+            <p class="comment-empty" data-en="No comments yet. Be the first!" data-bg="Все още няма коментари. Бъди първият!">No comments yet. Be the first!</p>
+        }
+        else
+        {
+            <div style="margin-bottom: 1rem;">
+                @foreach (var comment in Model.Comments.Where(c => c.ParentCommentId == null))
+                {
+                    <div class="car-comment" id="comment-@comment.Id">
+                        @if (Model.AdminAuthorIds.Contains(comment.AuthorId))
+                        {
+                            <span class="car-comment-author car-comment-author-admin">ADMIN</span>
+                        }
+                        else
+                        {
+                            <span class="car-comment-author">@comment.AuthorName</span>
+                        }
+                        <span class="car-comment-date">@FormatDate(comment.CreatedAt)</span>
+                        <p class="car-comment-text">@comment.Text</p>
+
+                        @if (User.IsInRole(AdminSeed.AdminRole))
+                        {
+                            <form asp-controller="Home" asp-action="DeleteComment" asp-route-slug="@car.Slug" asp-route-id="@comment.Id" method="post" class="comment-actions">
+                                <button type="submit" class="comment-reply-toggle">DELETE</button>
+                            </form>
+                        }
+
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <div class="comment-actions">
+                                <button type="button" class="comment-reply-toggle" data-reply-toggle="@comment.Id" data-en="REPLY" data-bg="ОТГОВОРИ">REPLY</button>
+                            </div>
+                            <form asp-controller="Home" asp-action="PostComment" asp-route-slug="@car.Slug" method="post" class="comment-form comment-reply-form" data-reply-form="@comment.Id">
+                                <input type="hidden" name="ParentCommentId" value="@comment.Id" />
+                                <textarea name="Text" placeholder="Write a reply..." required maxlength="1000" rows="2"></textarea>
+                                <button type="submit">REPLY</button>
+                            </form>
+                        }
+
+                        @foreach (var reply in Model.Comments.Where(c => c.ParentCommentId == comment.Id).OrderBy(c => c.CreatedAt))
+                        {
+                            <div class="car-comment car-comment-reply" id="comment-@reply.Id">
+                                @if (Model.AdminAuthorIds.Contains(reply.AuthorId))
+                                {
+                                    <span class="car-comment-author car-comment-author-admin">ADMIN</span>
+                                }
+                                else
+                                {
+                                    <span class="car-comment-author">@reply.AuthorName</span>
+                                }
+                                <span class="car-comment-date">@FormatDate(reply.CreatedAt)</span>
+                                <p class="car-comment-text">@reply.Text</p>
+
+                                @if (User.IsInRole(AdminSeed.AdminRole))
+                                {
+                                    <form asp-controller="Home" asp-action="DeleteComment" asp-route-slug="@car.Slug" asp-route-id="@reply.Id" method="post" class="comment-actions">
+                                        <button type="submit" class="comment-reply-toggle">DELETE</button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form asp-controller="Home" asp-action="PostComment" asp-route-slug="@car.Slug" method="post" class="comment-form">
+                <div asp-validation-summary="ModelOnly" class="form-error"></div>
+                <textarea name="Text" placeholder="Write a comment..." required maxlength="1000" rows="2"></textarea>
+                <button type="submit">POST</button>
+            </form>
+        }
+        else
+        {
+            <a href="/login?returnUrl=%2Fcar%2F@car.Slug" style="display: inline-block; color: var(--color-text); font-size: 0.8rem; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-heading);" data-en="Log in to comment" data-bg="Влез, за да коментираш">Log in to comment</a>
+        }
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('[data-reply-toggle]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var form = document.querySelector('[data-reply-form="' + button.dataset.replyToggle + '"]');
+                if (form) form.classList.toggle('is-open');
+            });
+        });
+    </script>
+}
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <form id="image-like-token" style="display: none;">
+        @Html.AntiForgeryToken()
+    </form>
+}

@@ -1,0 +1,157 @@
+@model AdminDashboardViewModel
+@{
+    ViewBag.IsHome = false;
+
+    string FormatDate(DateTime utc)
+    {
+        var local = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), TimeZoneInfo.Local);
+        string[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        return $"{months[local.Month - 1]} {local.Day:00}, {local.Year} {local.Hour:00}:{local.Minute:00}";
+    }
+}
+
+<style>
+    .admin-page { min-height: 100vh; padding: 12.5rem 5% 4rem; }
+    .admin-wrap { max-width: 900px; margin: 0 auto; }
+    .admin-section + .admin-section { margin-top: 3rem; }
+    .admin-title {
+        font-family: var(--font-heading); font-size: 2rem; text-transform: uppercase;
+        letter-spacing: 5px; margin: 0 0 1.5rem;
+    }
+    .admin-table {
+        width: 100%; border-collapse: collapse; background: #2b2b2b; color: var(--color-text);
+    }
+    .admin-table th, .admin-table td {
+        border: 1px solid rgba(255, 255, 255, 0.12); padding: 0.8rem 1rem; text-align: left;
+    }
+    .admin-table th {
+        background: #3a3a3a; font-family: var(--font-heading); font-size: 0.8rem;
+        letter-spacing: 2px; text-transform: uppercase;
+    }
+    .admin-table tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.03); }
+    .admin-table .num { text-align: center; width: 170px; }
+    .admin-empty { text-align: center; color: var(--color-silver); }
+    .admin-comment-link { color: inherit; text-decoration: none; display: block; }
+    .admin-comment-link:hover { text-decoration: underline; }
+    .admin-comment-car {
+        color: #ffffff; font-family: var(--font-heading); font-size: 0.75rem;
+        letter-spacing: 1px; text-transform: uppercase;
+    }
+    .admin-comment-date { margin-left: 0.5rem; color: var(--color-silver); font-size: 0.7rem; }
+    .admin-comment-text { margin: 0.25rem 0 0; white-space: pre-line; overflow-wrap: anywhere; }
+    .admin-delete-button {
+        background: transparent; color: var(--color-text); border: 1px solid rgba(255, 255, 255, 0.25);
+        padding: 0.3rem 0.6rem; font-family: var(--font-heading); font-size: 0.7rem;
+        letter-spacing: 1px; text-transform: uppercase; cursor: pointer; margin-top: 0.5rem;
+    }
+    @@media (max-width: 700px) {
+        .admin-page { padding-top: 9rem; }
+        .admin-table { font-size: 0.85rem; }
+        .admin-table th, .admin-table td { padding: 0.65rem 0.55rem; }
+        .admin-table .num { width: auto; }
+        .admin-title { font-size: 1.5rem; letter-spacing: 3px; }
+    }
+</style>
+
+<section class="admin-page">
+    <div class="admin-wrap">
+        <section class="admin-section">
+            <h1 class="admin-title" data-en="User Accounts" data-bg="Потребителски акаунти">User Accounts</h1>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-en="User name" data-bg="Потребител">User name</th>
+                        <th data-en="Email" data-bg="Имейл">Email</th>
+                        <th class="num" data-en="Images liked" data-bg="Харесани снимки">Images liked</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Users.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3" class="admin-empty" data-en="No registered users yet." data-bg="Все още няма регистрирани потребители.">No registered users yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                @if (user.IsAdmin)
+                                {
+                                    <td colspan="3">admin</td>
+                                }
+                                else
+                                {
+                                    <td>@user.UserName</td>
+                                    <td>@user.Email</td>
+                                    <td class="num">@user.ImagesLiked</td>
+                                }
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </section>
+
+        <section class="admin-section">
+            <h2 class="admin-title" data-en="Comments" data-bg="Коментари">Comments</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-en="Comment" data-bg="Коментар">Comment</th>
+                        <th data-en="User" data-bg="Потребител">User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Comments.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="2" class="admin-empty" data-en="No comments yet." data-bg="Все още няма коментари.">No comments yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var comment in Model.Comments)
+                        {
+                            <tr>
+                                <td>
+                                    <a class="admin-comment-link" href="@($"/car/{comment.CarSlug}#comment-{comment.Id}")">
+                                        <span class="admin-comment-car">@comment.CarName</span>
+                                        <span class="admin-comment-date">@FormatDate(comment.CreatedAt)</span>
+                                        <p class="admin-comment-text">@comment.Text</p>
+                                    </a>
+                                    <form asp-controller="Home" asp-action="DeleteComment" asp-route-slug="@comment.CarSlug" asp-route-id="@comment.Id" asp-route-returnUrl="/admin" method="post">
+                                        <button type="submit" class="admin-delete-button">DELETE</button>
+                                    </form>
+                                </td>
+                                <td>@comment.UserName</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </section>
+
+        <section class="admin-section">
+            <h2 class="admin-title" data-en="Car Likes" data-bg="Харесвания на автомобили">Car Likes</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-en="Car" data-bg="Автомобил">Car</th>
+                        <th class="num" data-en="Likes" data-bg="Харесвания">Likes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var car in Model.CarLikes)
+                    {
+                        <tr>
+                            <td>@car.CarName</td>
+                            <td class="num">@car.Likes</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    </div>
+</section>

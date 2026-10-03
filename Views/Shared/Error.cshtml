@@ -1,0 +1,22 @@
+@{
+    var code = ViewBag.StatusCode as int?;
+    var title = code switch
+    {
+        404 => "NOT FOUND",
+        _ => "SOMETHING WENT WRONG"
+    };
+    var detail = code switch
+    {
+        404 => "That page does not exist.",
+        _ => "An unexpected error occurred."
+    };
+}
+
+<section style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 6rem 2rem 2rem; text-align: center;">
+    <div>
+        <h1 style="font-family: var(--font-heading); font-size: clamp(4rem, 12vw, 9rem); text-transform: uppercase; letter-spacing: 6px;">@(code?.ToString() ?? "ERROR")</h1>
+        <p style="color: var(--color-silver); font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; margin: 1rem 0 2rem;">@title</p>
+        <p style="color: var(--color-silver); font-size: 0.9rem; margin-bottom: 2rem;">@detail</p>
+        <a href="/" style="display: inline-block; color: var(--color-text); text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; font-family: var(--font-heading);" data-en="&larr; Back to site" data-bg="&larr; Обратно към сайта">&larr; Back to site</a>
+    </div>
+</section>

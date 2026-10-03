@@ -1,0 +1,99 @@
+﻿@inject UserManager<ApplicationUser> UserManager
+@{
+    var isHome = ViewBag.IsHome == true;
+    var hideFooter = ViewBag.HideFooter == true;
+    var signedIn = User.Identity?.IsAuthenticated == true
+        ? await UserManager.GetUserAsync(User)
+        : null;
+}
+<!DOCTYPE html>
+<html lang="en" data-page="@(isHome ? "home" : "inner")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auto Focus | The Ultimate Experience</title>
+
+    @* Holds the page back for one frame when a Bulgarian preference is saved, so
+       the language swap that happens on load cannot be seen. *@
+    <script>
+        try {
+            if (localStorage.getItem('af_lang') === 'bg') {
+                document.documentElement.classList.add('lang-pending');
+            }
+        } catch (e) { }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Oswald:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="cursor"></div>
+
+    <div class="preloader" id="preloader"><h1 class="preloader-text">AUTO FOCUS</h1></div>
+
+    <header class="header" id="siteHeader">
+        <div class="header-brand-links" style="position: absolute; left: 3%; display: flex; align-items: center; gap: 15px;">
+            <a href="/ferrari" class="auth-link" style="color: var(--color-text); text-decoration: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">FERRARI</a>
+            <a href="/lamborghini" class="auth-link" style="color: var(--color-text); text-decoration: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">LAMBORGHINI</a>
+            <a href="/porsche" class="auth-link" style="color: var(--color-text); text-decoration: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">PORSCHE</a>
+            <a href="/mclaren" class="auth-link" style="color: var(--color-text); text-decoration: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">MCLAREN</a>
+            <a href="/bugatti" class="auth-link" style="color: var(--color-text); text-decoration: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">BUGATTI</a>
+        </div>
+        <a href="/" class="logo" style="position: absolute; left: 50%; transform: translateX(-50%);">AUTO FOCUS</a>
+        <div style="position: absolute; right: 3%; display: flex; align-items: center; gap: 10px;" id="authArea">
+            @if (signedIn is not null)
+            {
+                <a href="/dashboard" class="auth-link" style="color: var(--color-text); text-decoration: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">DASHBOARD</a>
+                <form asp-controller="Account" asp-action="Logout" method="post" style="display: contents;">
+                    <button id="logoutBtn" type="submit" class="auth-link" style="background: transparent; border: 1px solid var(--color-text); color: var(--color-text); padding: 0.4rem 0.8rem; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; transition: all 0.3s;">LOGOUT</button>
+                </form>
+            }
+            else
+            {
+                <a href="/login" class="auth-link auth-link-boxed" data-en="LOGIN" data-bg="ВХОД" style="color: var(--color-text); text-decoration: none; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; border: 1px solid var(--color-text); padding: 0.4rem 0.8rem; display: inline-block; transition: all 0.3s;">LOGIN</a>
+            }
+            <button class="lang-toggle" aria-label="Toggle Language">BG</button>
+            <button class="burger-menu" aria-label="Menu" aria-expanded="false" aria-controls="slideMenu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <div class="slide-menu" id="slideMenu">
+        <a href="/ferrari" class="menu-link mobile-only-menu-item">FERRARI</a>
+        <a href="/lamborghini" class="menu-link mobile-only-menu-item">LAMBORGHINI</a>
+        <a href="/porsche" class="menu-link mobile-only-menu-item">PORSCHE</a>
+        <a href="/mclaren" class="menu-link mobile-only-menu-item menu-brand-link">MCLAREN</a>
+        <a href="/bugatti" class="menu-link mobile-only-menu-item menu-brand-link">BUGATTI</a>
+        <a href="/" class="menu-link" data-en="HOME" data-bg="НАЧАЛО">HOME</a>
+        <a href="/#models" class="menu-link" data-en="CARS" data-bg="АВТОМОБИЛИ">CARS</a>
+        @if (signedIn is not null)
+        {
+            <a href="/dashboard" class="menu-link" data-en="DASHBOARD" data-bg="ТАБЛО">DASHBOARD</a>
+            <form asp-controller="Account" asp-action="Logout" method="post" style="display: contents;">
+                <button type="submit" id="logoutBtnMobile" class="menu-link mobile-only-menu-item" style="background: transparent; border: none; cursor: pointer;">LOGOUT</button>
+            </form>
+        }
+        else
+        {
+            <a href="/login" class="menu-link mobile-only-menu-item" data-en="LOGIN" data-bg="ВХОД">LOGIN</a>
+            <a href="/register" class="menu-link" data-en="SIGN UP" data-bg="РЕГИСТРАЦИЯ">SIGN UP</a>
+        }
+        <button type="button" class="lang-toggle-mobile mobile-only-menu-item" style="background: transparent; border: 1px solid #050505; color: #050505; padding: 0.5rem 0.8rem; font-family: var(--font-heading); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;">BG</button>
+    </div>
+
+    <main id="app">
+        @RenderBody()
+    </main>
+
+    @if (!hideFooter)
+    {
+        <footer class="footer" id="siteFooter">
+            <a href="/" class="logo">AUTO FOCUS</a>
+            <p data-en="Creator of this project: Atanas Tanev" data-bg="Създател на проекта: Атанас Танев">Creator of this project: Atanas Tanev</p>
+            <p data-en="&copy; 2026 Auto Focus Experiences. All rights reserved." data-bg="&copy; 2026 Auto Focus Experiences. Всички права запазени.">&copy; 2026 Auto Focus Experiences. All rights reserved.</p>
+        </footer>
+    }
+
+    <script src="~/js/script.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
